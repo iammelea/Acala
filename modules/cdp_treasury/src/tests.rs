@@ -3,8 +3,36 @@
 #![cfg(test)]
 
 use super::*;
-use mock::{CdpTreasuryModule, Currencies, ExtBuilder, AUSD};
+use frame_support::assert_ok;
+use mock::{CdpTreasuryModule, Currencies, ExtBuilder, ACA, ALICE, AUSD};
 use sp_runtime::traits::OnFinalize;
+
+#[test]
+fn update_balance_should_work() {
+	ExtBuilder::default().build().execute_with(|| {
+		assert_eq!(Currencies::balance(AUSD, &ALICE), 1000);
+		assert_ok!(CdpTreasuryModule::update_balance(ACA, &ALICE, 100));
+		assert_eq!(Currencies::balance(AUSD, &ALICE), 1050);
+	});
+}
+
+#[test]
+fn deposit_should_work() {
+	ExtBuilder::default().build().execute_with(|| {
+		assert_eq!(Currencies::balance(AUSD, &ALICE), 1000);
+		assert_ok!(CdpTreasuryModule::deposit(ACA, &ALICE, 100));
+		assert_eq!(Currencies::balance(AUSD, &ALICE), 1050);
+	});
+}
+
+#[test]
+fn withdraw_should_work() {
+	ExtBuilder::default().build().execute_with(|| {
+		assert_eq!(Currencies::balance(AUSD, &ALICE), 1000);
+		assert_ok!(CdpTreasuryModule::withdraw(ACA, &ALICE, 100));
+		assert_eq!(Currencies::balance(AUSD, &ALICE), 950);
+	});
+}
 
 #[test]
 fn on_debit_work() {

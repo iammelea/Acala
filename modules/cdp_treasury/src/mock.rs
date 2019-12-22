@@ -30,7 +30,10 @@ pub type BlockNumber = u64;
 pub type Balance = u64;
 pub type Amount = i64;
 pub type CurrencyId = u32;
+pub type DebitBalance = u32;
+pub type DebitAmount = i64;
 
+pub const ALICE: AccountId = 1;
 pub const ACA: CurrencyId = 0;
 pub const AUSD: CurrencyId = 1;
 
@@ -87,9 +90,22 @@ impl orml_currencies::Trait for Runtime {
 }
 pub type Currencies = orml_currencies::Module<Runtime>;
 
+pub struct ConvertHandler;
+impl Convert<(CurrencyId, DebitBalance), Balance> for ConvertHandler {
+	fn convert(a: (CurrencyId, DebitBalance)) -> Balance {
+		let debit_balance: u32 = (a.1 / DebitBalance::from(2u32)).into();
+		let balance = debit_balance as u64;
+		balance
+	}
+}
+
 impl Trait for Runtime {
 	type Currency = Currencies;
 	type GetStableCurrencyId = GetStableCurrencyId;
+	type CurrencyId = CurrencyId;
+	type DebitBalance = DebitBalance;
+	type DebitAmount = DebitAmount;
+	type Convert = ConvertHandler;
 }
 pub type CdpTreasuryModule = Module<Runtime>;
 
@@ -103,7 +119,7 @@ impl Default for ExtBuilder {
 	fn default() -> Self {
 		Self {
 			currency_ids: vec![ACA, AUSD],
-			endowed_accounts: vec![],
+			endowed_accounts: vec![ALICE],
 			initial_balance: 1000,
 		}
 	}

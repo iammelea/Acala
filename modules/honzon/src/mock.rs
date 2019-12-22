@@ -1,4 +1,4 @@
-//! Mocks for the debit module.
+//! Mocks for the honzon module.
 
 #![cfg(test)]
 
@@ -100,24 +100,12 @@ impl orml_currencies::Trait for Runtime {
 	type NativeCurrency = AdaptedBasicCurrency;
 	type GetNativeCurrencyId = GetNativeCurrencyId;
 }
-
 pub type Currencies = orml_currencies::Module<Runtime>;
-
-impl debits::Trait for Runtime {
-	type Currency = Currencies;
-	type GetStableCurrencyId = GetStableCurrencyId;
-	type DebitBalance = DebitBalance;
-	type CurrencyId = CurrencyId;
-	type DebitAmount = DebitAmount;
-	type Convert = cdp_engine::DebitExchangeRateConvertor<Runtime>;
-}
-pub type DebitCurrency = debits::Module<Runtime>;
 
 impl vaults::Trait for Runtime {
 	type Event = ();
-	type Convert = cdp_engine::DebitExchangeRateConvertor<Runtime>;
 	type Currency = Tokens;
-	type DebitCurrency = DebitCurrency;
+	type DebitCurrency = CdpTreasury;
 	type RiskManager = CdpEngineModule;
 }
 pub type VaultsModule = vaults::Module<Runtime>;
@@ -149,6 +137,10 @@ impl AuctionManager<AccountId> for MockAuctionManager {
 impl cdp_treasury::Trait for Runtime {
 	type Currency = Currencies;
 	type GetStableCurrencyId = GetStableCurrencyId;
+	type CurrencyId = CurrencyId;
+	type DebitBalance = DebitBalance;
+	type DebitAmount = DebitAmount;
+	type Convert = cdp_engine::DebitExchangeRateConvertor<Runtime>;
 }
 pub type CdpTreasury = cdp_treasury::Module<Runtime>;
 

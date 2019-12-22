@@ -2,12 +2,15 @@
 
 #![cfg(test)]
 
+use super::*;
 use frame_support::{impl_outer_origin, parameter_types};
-use sp_runtime::{testing::Header, traits::IdentityLookup, Perbill};
+use sp_runtime::{
+	testing::Header,
+	traits::{Convert, IdentityLookup},
+	Perbill,
+};
 use su_primitives::H256;
 use support::RiskManager;
-
-use super::*;
 
 impl_outer_origin! {
 	pub enum Origin for Runtime {}
@@ -35,14 +38,6 @@ pub const NATIVE_CURRENCY_ID: CurrencyId = 0;
 pub const AUSD: CurrencyId = 1;
 pub const X_TOKEN_ID: CurrencyId = 2;
 pub const Y_TOKEN_ID: CurrencyId = 3;
-
-// mock convert
-pub struct MockConvert;
-impl Convert<(CurrencyId, DebitBalance), Balance> for MockConvert {
-	fn convert(a: (CurrencyId, DebitBalance)) -> Balance {
-		(a.1 / DebitBalance::from(2u64)).into()
-	}
-}
 
 // tokens module
 impl orml_tokens::Trait for Runtime {
@@ -89,17 +84,23 @@ impl orml_currencies::Trait for Runtime {
 }
 pub type Currencies = orml_currencies::Module<Runtime>;
 
-impl debits::Trait for Runtime {
+// mock convert
+pub struct MockConvert;
+impl Convert<(CurrencyId, DebitBalance), Balance> for MockConvert {
+	fn convert(a: (CurrencyId, DebitBalance)) -> Balance {
+		(a.1 / DebitBalance::from(2u64)).into()
+	}
+}
+
+impl cdp_treasury::Trait for Runtime {
 	type Currency = Currencies;
 	type GetStableCurrencyId = GetStableCurrencyId;
-	type DebitBalance = DebitBalance;
 	type CurrencyId = CurrencyId;
+	type DebitBalance = DebitBalance;
 	type DebitAmount = DebitAmount;
 	type Convert = MockConvert;
 }
-
-// debit module
-pub type DebitCurrency = debits::Module<Runtime>;
+pub type DebitCurrency = cdp_treasury::Module<Runtime>;
 
 // mock risk manager
 pub struct MockRiskManager;
@@ -130,7 +131,6 @@ impl RiskManager<AccountId, CurrencyId, Amount, DebitAmount> for MockRiskManager
 
 impl Trait for Runtime {
 	type Event = ();
-	type Convert = MockConvert;
 	type Currency = Currencies;
 	type DebitCurrency = DebitCurrency;
 	type RiskManager = MockRiskManager;

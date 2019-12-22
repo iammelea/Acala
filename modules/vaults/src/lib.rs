@@ -4,7 +4,7 @@ use frame_support::{decl_error, decl_event, decl_module, decl_storage, ensure};
 use orml_traits::{arithmetic::Signed, MultiCurrency, MultiCurrencyExtended};
 use rstd::{convert::TryInto, result};
 use sp_runtime::{
-	traits::{AccountIdConversion, CheckedAdd, CheckedSub, Convert},
+	traits::{AccountIdConversion, CheckedAdd, CheckedSub},
 	ModuleId,
 };
 
@@ -13,11 +13,10 @@ use support::RiskManager;
 mod mock;
 mod tests;
 
-const MODULE_ID: ModuleId = ModuleId(*b"xr1d84ts");
+const MODULE_ID: ModuleId = ModuleId(*b"aca/vlts");
 
 pub trait Trait: system::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
-	type Convert: Convert<(CurrencyIdOf<Self>, DebitBalanceOf<Self>), BalanceOf<Self>>;
 	type Currency: MultiCurrencyExtended<Self::AccountId>;
 	type DebitCurrency: MultiCurrencyExtended<Self::AccountId, CurrencyId = CurrencyIdOf<Self>>;
 	type RiskManager: RiskManager<Self::AccountId, CurrencyIdOf<Self>, AmountOf<Self>, DebitAmountOf<Self>>;
@@ -278,7 +277,7 @@ impl<T: Trait> Module<T> {
 		let debits_balance =
 			TryInto::<DebitBalanceOf<T>>::try_into(debits.abs()).map_err(|_| Error::AmountIntoBalanceFailed)?;
 
-		// updaet collaterals record
+		// update collaterals record
 		if collaterals.is_positive() {
 			<Collaterals<T>>::mutate(who, currency_id, |balance| *balance += collaterals_balance);
 			<TotalCollaterals<T>>::mutate(currency_id, |balance| *balance += collaterals_balance);
@@ -287,7 +286,7 @@ impl<T: Trait> Module<T> {
 			<TotalCollaterals<T>>::mutate(currency_id, |balance| *balance -= collaterals_balance);
 		}
 
-		// updaet debits record
+		// update debits record
 		if debits.is_positive() {
 			<Debits<T>>::mutate(who, currency_id, |balance| *balance += debits_balance);
 			<TotalDebits<T>>::mutate(currency_id, |balance| *balance += debits_balance);

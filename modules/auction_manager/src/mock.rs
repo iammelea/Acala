@@ -32,6 +32,8 @@ pub type AuctionId = u64;
 pub type CurrencyId = u32;
 pub type Balance = u64;
 pub type Amount = i64;
+pub type DebitBalance = u64;
+pub type DebitAmount = i64;
 
 impl system::Trait for Runtime {
 	type Origin = Origin;
@@ -70,6 +72,10 @@ pub type Auction = orml_auction::Module<Runtime>;
 impl cdp_treasury::Trait for Runtime {
 	type Currency = Tokens;
 	type GetStableCurrencyId = GetStableCurrencyId;
+	type CurrencyId = CurrencyId;
+	type DebitBalance = DebitBalance;
+	type DebitAmount = DebitAmount;
+	type Convert = ();
 }
 pub type CdpTreasury = cdp_treasury::Module<Runtime>;
 

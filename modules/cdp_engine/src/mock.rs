@@ -41,6 +41,7 @@ pub type BlockNumber = u64;
 pub type Balance = u64;
 pub type DebitBalance = u64;
 pub type Amount = i64;
+pub type DebitAmount = i64;
 pub type CurrencyId = u32;
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
@@ -103,21 +104,10 @@ impl orml_currencies::Trait for Runtime {
 }
 pub type Currencies = orml_currencies::Module<Runtime>;
 
-impl debits::Trait for Runtime {
-	type CurrencyId = CurrencyId;
-	type Currency = Currencies;
-	type GetStableCurrencyId = GetStableCurrencyId;
-	type DebitBalance = DebitBalance;
-	type Convert = DebitExchangeRateConvertor<Runtime>;
-	type DebitAmount = Amount;
-}
-pub type DebitsCurrency = debits::Module<Runtime>;
-
 impl vaults::Trait for Runtime {
 	type Event = ();
-	type Convert = DebitExchangeRateConvertor<Runtime>;
 	type Currency = Currencies;
-	type DebitCurrency = DebitsCurrency;
+	type DebitCurrency = CdpTreasury;
 	type RiskManager = CdpEngineModule;
 }
 pub type VaultsModule = vaults::Module<Runtime>;
@@ -152,6 +142,10 @@ impl AuctionManager<AccountId> for MockAuctionManager {
 impl cdp_treasury::Trait for Runtime {
 	type Currency = Currencies;
 	type GetStableCurrencyId = GetStableCurrencyId;
+	type CurrencyId = CurrencyId;
+	type DebitBalance = DebitBalance;
+	type DebitAmount = DebitAmount;
+	type Convert = DebitExchangeRateConvertor<Runtime>;
 }
 pub type CdpTreasury = cdp_treasury::Module<Runtime>;
 
